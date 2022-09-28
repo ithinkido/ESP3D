@@ -74,6 +74,12 @@ bool GcodeHost::push(const uint8_t * sbuf, size_t len)
     }
     log_esp3d("Push got %d bytes", len);
     for (size_t i = 0; i < len; i++) {
+        //########################
+        //HPGL does not use lines - send char as soon as it is ready
+        #ifdef PLOTTER_FLOW_CONTROL
+        flush();
+    }
+        #else
         //it is a line process it
         if (sbuf[i]=='\n' || sbuf[i]=='\r') {
             flush();
@@ -90,6 +96,8 @@ bool GcodeHost::push(const uint8_t * sbuf, size_t len)
         }
     }
     flush();
+
+    #endif 
 
     return true;
 }
@@ -117,6 +125,14 @@ void GcodeHost::flush()
     if(_bufferSize==0) {
         return;
     }
+    //#######################################
+    // HPGL - no response from plotter - no need to check
+    #ifdef PLOTTER_FLOW_CONTROL
+
+        _bufferSize = 0;
+
+    #else // standard serial
+
     _response = (const char*)_buffer;
     log_esp3d("Stream got the response: %s", _response.c_str());
     _response.toLowerCase();
@@ -137,6 +153,7 @@ void GcodeHost::flush()
     //What is have processing to do
     //what if have resend
     _bufferSize = 0;
+    #endif
 }
 
 void GcodeHost::startStream()
@@ -283,11 +300,20 @@ void GcodeHost::readNextCommand()
             } else {
                 _processedSize++;
                 _currentPosition++;
+
+                //#############################
+                //HPGL No line structure - send all char as they arrive
+                // this is not working as I would expect - it is VERY slow and adding CR after each char
+                #ifdef PLOTTER_FLOW_CONTROLtest
+                    _currentCommand+=(char)c;
+                    processing = false;
+                #else
                 if (!(((char)c =='\n') || ((char)c =='\r'))) {
                     _currentCommand+=(char)c;
                 } else {
                     processing = false;
                 }
+                #endif
             }
         }
         if (_currentCommand.length() == 0) {
@@ -315,8 +341,16 @@ bool GcodeHost::isCommand()
 }
 bool GcodeHost::isAckNeeded()
 {
+    #ifdef PLOTTER_FLOW_CONTROL
+    //#################################
+    //HPGL does not use any ack commands - all fow control is done with CTS/DTR pin
+    return false;
+
+    #else // Normal serial
+
     //TODO: what command do not need for ack ?
     return true;
+    #endif
 }
 void GcodeHost::processCommand()
 {
@@ -370,6 +404,20 @@ void GcodeHost::handle()
         startStream();
         break;
     case HOST_READ_LINE:
+        //#############################
+        //HPGL Check on CTS/DTR pin
+        #ifdef PLOTTER_FLOW_CONTROL
+        if (digitalRead(BUFFER_PIN)) { // 1 = buffer full , 0 = buffer has space
+            _step = HOST_PAUSE_STREAM;
+            _nextStep = HOST_READ_LINE;
+        }
+        else {
+             readNextCommand(); 
+        }
+        break;
+
+        #else // Normal serial
+
         if (_nextStep==HOST_PAUSE_STREAM) {
             _step = HOST_PAUSE_STREAM;
             _nextStep = HOST_READ_LINE;
@@ -377,6 +425,8 @@ void GcodeHost::handle()
             readNextCommand();
         }
         break;
+
+        #endif
     case HOST_PROCESS_LINE:
         processCommand();
         break;
@@ -388,7 +438,13 @@ void GcodeHost::handle()
         }
         break;
     case HOST_PAUSE_STREAM:
-        //TODO pause stream
+        //###################################
+        //HPGL Check on CTS/DTR pin - while no space - pause
+        #ifdef PLOTTER_FLOW_CONTROL
+        if (!(digitalRead(BUFFER_PIN))) { // 1 = buffer full , 0 = buffer has space
+            _step = HOST_READ_LINE;
+        }
+        #endif
         break;
     case HOST_RESUME_STREAM:
         //Any extra action to resume stream?
