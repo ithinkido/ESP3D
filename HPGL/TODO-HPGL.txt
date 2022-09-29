@@ -1,0 +1,8 @@
+get plotter model info ( OI;)
+get plotable area (OH;)
+work on parser when using LB command ( needs to ingnor CR NL , ; in this state)
+Jog commands - also get current pos when joging ( OA;)
+Poll the free space in buffer on slow loop - plot to graph ( ESC.B)
+alow following file formats - txt, hpgl plot
+plot preview ???
+Jog only shows x ?? I guess it os looking for feedback before dispaying the other axes
