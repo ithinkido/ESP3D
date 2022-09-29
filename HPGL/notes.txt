@@ -1,0 +1,63 @@
+HPGL is a text based language simalar to GCODE.. Some of the core dfferences are :
+It has no line structure like Gcode, commands can be sent as contiuos strings
+
+There is no ACK ("ok") from the plotter on reciveing data
+
+All data sent to the plotter is stored in an interal buffer and processed FIFO except for special commands tha tare usualy querry commands
+These are handked directly by the plotter and do not get put into the planner buffer.
+
+The flow of data to the plotter must be carefully controlled to avoid buffer overflow. 
+There are different ways of doing this , by far the most reliable is using hardware flow control.
+This is done by montoring the DTR/CTS pin on the plotter. It could also be done using constant querries,
+to determine how much free space is currently avalible in the buffer.
+
+In HPGL there are several ways of terminng a command. 
+These include CR , LF and ; 
+Most HPGL code is sent as a single contiuos steam without the need for CR nor LF. 
+I have added a parser that seperates the HPGL into blocks of commands and co-ordinates that are sent witha CR after each block.
+This allows the existing Serial write to remain and ensures that the HPGL syntax remains correct.
+
+HPGL has two broad groups of querry comands. The plotter will not send back any data,
+ unless it is asked for using one of these commands.
+
+Commands that use the ESC char or processed imeadiately without spending any time in the planner buffer.
+From experience , "imeadiately" on these old machine rages form about 20ms to as long as 200ms. 
+The other groupe of commands all start with the letter "O".
+
+ESC Commands that are usefull for our needs
+-------------------------------------------
+
+ESC command do not need to be aware of following HPGL syntax as they are proceesed imeadiately and do not get placed in the planner buffer
+This means you can write an ESC command in the middle of a normal HPGL command and it would not break the syntax
+eg PU10ESC.L0,200;
+
+ESC.B - currently avalible free space in the plotter buffer ( bytes)- eg 1024/n
+ESC.E - output a decimal code if an RS232 error has occured
+        0 - No error
+        10 - querry command recieved wihile another is still processing. Last command will be ignored
+        11 - Invalid ESC command
+        12 - Invald command - incorect HPGL syntax
+        13 - Parameter out of range
+        14 - To many parameters for given commmand
+        15 - Framing error, parity error, or overrunn error
+        16 - Buffer overflow
+ESC.K - abort current plot - no reply
+ESC.L - Total size of plotter buffer (bytes) - eg 1024/n      
+ESC.O - Output extended status - is usefull for checking if plotter is online and ready. 
+        0 - Buffer contains data and plotter is processing these commands
+        8 - Buffer is empty and ready to recieve commands
+        16 - Buffer has data and View buttom has been processed ( plot is paused)
+        24 - Buffer is empty - View button pressed 
+        32 - Buffer has data , Paper is not loaded
+        40 - Buffer is empty , Paper not loaded
+
+There are more ESC commands, but I do not think the others will be relevant 
+
+O.. commands
+------------
+
+These are processed in the planner buffer and will be handled when the plotter reads that section of data
+Writing these should be done while following the proper HPGL syntax
+
+eg - **NO GOOD** PU1OE;0,
+

@@ -242,6 +242,58 @@ void GcodeHost::endStream()
     _step = HOST_NO_STREAM;
 }
 
+bool GcodeHost::detectControlChar(char c)
+{
+
+//#define ESC  0x1B   // the USB escape char - TODO - use later for querry commands
+#define CR   0xD    // Carriage return
+#define LF   0xA    // Newline/linefeed
+#define COMMA   0x2C   // ',' character
+#define S_COLON 0x3B   // ';' character
+
+static int counter;
+
+    switch (c) {
+      // Carriage return or newline? Then process the line
+      case CR:
+        return true;       
+        break;
+
+      case LF:
+        return true;       
+        break;  
+
+      case COMMA:
+        // Handle the comma character
+        // If it is the second comma we have a full command - send data 
+        if (counter == 1){
+          // reset counter          
+          counter = 0;
+          return true;      
+        }else {
+        // Not a complete block yet, wait for next comma  
+        counter++ ; 
+            return false;        
+        }
+        break;
+
+      case S_COLON:
+        // Handle the semicolon character
+        if (c == S_COLON) {
+          // Semicolon - reset counter
+          counter = 0; 
+          // end of command block - send data
+          return true;
+        }
+        break;
+
+      default: 
+        // any char other than defined above
+        return false;
+    }
+}
+
+
 void GcodeHost::readNextCommand()
 {
     _currentCommand = "";
@@ -302,11 +354,13 @@ void GcodeHost::readNextCommand()
                 _currentPosition++;
 
                 //#############################
-                //HPGL No line structure - send all char as they arrive
+                //HPGL Has no line structure - send all char as they arrive
                 // this is not working as I would expect - it is VERY slow and adding CR after each char
-                #ifdef PLOTTER_FLOW_CONTROLtest
-                    _currentCommand+=(char)c;
+                #ifdef PLOTTER_FLOW_CONTROL
+                if (! ((char)c =='\n') || ((char)c =='\r'))_currentCommand+=(char)c;
+                if (detectControlChar(c)){
                     processing = false;
+                }
                 #else
                 if (!(((char)c =='\n') || ((char)c =='\r'))) {
                     _currentCommand+=(char)c;
