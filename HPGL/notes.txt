@@ -59,5 +59,36 @@ O.. commands
 These are processed in the planner buffer and will be handled when the plotter reads that section of data
 Writing these should be done while following the proper HPGL syntax
 
-eg - **NO GOOD** PU1OE;0,
+eg - **NO GOOD** PU1OE;0,100
+     **GOOD**   PU100,100;OE;
+
+OA; - Output actual position X,Y,PEN UP/DOWN eg 100,100,1/n
+OC; - Output commanded position - X,Y,PEN UP/DOWN 
+OD; - Output post in digitise mode - X,Y,PEN UP DOWN
+OE; - Output Error - if the last code block had erreors they will be reported - error flag will be cleared on sending
+        0 - No error
+        1 - Instruction not recognised
+        2 - Wrong number of parameters
+        3 - Out of range parameters
+        4 - not used
+        5 - Unknown char set
+        6 - Position overflow ( plot out of bounds)
+        7 - not used
+        8 - Plotter not ready ( paper not loaded)
+OF; - Output steps / mm - always 40
+OI; - Output model number / plotter ID eg 7475a/n
+OS; - Output status
+        1 - pen DOWN
+        2 - P1 or P2 have been changed
+        4 - Ditigtized poit avalible to read
+        8 - Initialized
+        16 - paper loaded - plotter ready
+        32 - Error
+        64 - Service required ( not used )
+        128 - not used
+OH; - Output hard clip limits - or max plottable size in plotter steps ( *40 = mm) for loaded page x1,y1,x2,y2 - eg 0,0,7400,11200
+
+OP; - Output position of P1 and P2 used for scaling
+OW; - Output current defined plot window -- x1,y1,x2,y2 
+
 
