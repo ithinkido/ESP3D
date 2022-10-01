@@ -127,6 +127,7 @@ public:
     bool resume();
     void startStream();
     void readNextCommand();
+    bool detectControlChar(char c);
     void endStream();
     void processCommand();
     bool isCommand();

@@ -25,7 +25,8 @@ Esp3D myesp3d;
 //Setup
 void setup()
 {
-    myesp3d.begin();
+    pinMode(2, INPUT_PULLUP);
+    myesp3d.begin();    
 }
 
 //main loop
