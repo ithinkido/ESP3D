@@ -1,10 +1,26 @@
 get plotter model info ( OI;)
 get plotable area (OH;)
 work on parser when using LB command ( needs to ingnor CR NL , ; in this state)
-Jog commands - also get current pos when joging ( OA;)
+
 
 Poll the free space in buffer on slow loop - plot to graph ( ESC.B)
 ESC. char translatetion is done - tested good - find out about chart display
 
-plot preview ???
-Jog only shows x ?? I guess it os looking for feedback before dispaying the other axes
+Jog only shows x ?? I guess it is looking for feedback before dispaying the other axes
+
+Remove machine config pannel. the machine does not provide config data on boot.
+
+Change Z to Pen UP/Dowm and remove Z feedrate
+
+get current pos when joging ( OA;)
+
+Find a good way to handle Pen UP / DOWN status dispaly ( plotter will auto PU after 15 sec no activity) 
+
+
+Panells needed for HPGL :
+    Files ( SD first mot flash)
+    Terminal 
+    Jog - X Y Pen UP/DOWN - get pos with OA.
+    Status - OI; OH; ESC.B ESC.L ESC.O
+    ?? Preview ??  
+
