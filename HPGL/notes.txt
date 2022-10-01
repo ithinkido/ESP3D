@@ -50,7 +50,6 @@ ESC.O - Output extended status - is usefull for checking if plotter is online an
         24 - Buffer is empty - View button pressed 
         32 - Buffer has data , Paper is not loaded
         40 - Buffer is empty , Paper not loaded
-
 There are more ESC commands, but I do not think the others will be relevant 
 
 O.. commands
