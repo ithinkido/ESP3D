@@ -10,3 +10,10 @@ embedded/node_modules
 .vscode/launch.json
 .vscode/arduino.json
 esp3d/myconfig.h
+platformio.ini
+platformio.ini
+esp3d/configuration.h
+platformio.ini
+esp3d/configuration.h
+platformio.ini
+esp3d/configuration.h

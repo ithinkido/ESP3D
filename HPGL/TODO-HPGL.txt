@@ -1,6 +1,5 @@
 get plotter model info ( OI;)
 get plotable area (OH;)
-work on parser when using LB command ( needs to ingnor CR NL , ; in this state)
 
 
 Poll the free space in buffer on slow loop - plot to graph ( ESC.B)

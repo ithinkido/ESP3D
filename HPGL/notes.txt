@@ -61,9 +61,9 @@ Writing these should be done while following the proper HPGL syntax
 eg - **NO GOOD** PU1OE;0,100
      **GOOD**   PU100,100;OE;
 
-OA; - Output actual position X,Y,PEN UP/DOWN eg 100,100,1/n
-OC; - Output commanded position - X,Y,PEN UP/DOWN 
-OD; - Output post in digitise mode - X,Y,PEN UP DOWN
+OA; - Output actual position X,Y,PEN UP/DOWN eg 100,100,1/n ( pen down = 1 up =0)
+OC; - Output commanded position - X,Y,PEN UP/DOWN  eg 100,100,1/n ( pen down = 1 up =0)
+OD; - Output post in digitise mode - X,Y,PEN UP DOWN eg 100,100,1/n ( pen down = 1 up =0)
 OE; - Output Error - if the last code block had erreors they will be reported - error flag will be cleared on sending
         0 - No error
         1 - Instruction not recognised
@@ -85,9 +85,9 @@ OS; - Output status
         32 - Error
         64 - Service required ( not used )
         128 - not used
-OH; - Output hard clip limits - or max plottable size in plotter steps ( *40 = mm) for loaded page x1,y1,x2,y2 - eg 0,0,7400,11200
+OH; - Output hard clip limits - or max plottable size in plotter steps ( *40 = mm) for loaded page x1,y1,x2,y2 - eg 0,0,7400,11200/n
 
-OP; - Output position of P1 and P2 used for scaling
-OW; - Output current defined plot window -- x1,y1,x2,y2 
+OP; - Output position of P1 and P2 used for scaling eg 0,0,7400,11200/n
+OW; - Output current defined plot window -- x1,y1,x2,y2  eg 0,0,7400,11200/n
 
 
