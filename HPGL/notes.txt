@@ -3,8 +3,8 @@ It has no line structure like Gcode, commands can be sent as contiuos strings
 
 There is no ACK ("ok") from the plotter on reciveing data
 
-All data sent to the plotter is stored in an interal buffer and processed FIFO except for special commands tha tare usualy querry commands
-These are handked directly by the plotter and do not get put into the planner buffer.
+All data sent to the plotter is stored in an interal buffer and processed FIFO except for special commands that are usualy querry commands
+These are handed directly by the plotter and do not get put into the planner buffer.
 
 The flow of data to the plotter must be carefully controlled to avoid buffer overflow. 
 There are different ways of doing this , by far the most reliable is using hardware flow control.
@@ -29,7 +29,7 @@ ESC Commands that are usefull for our needs
 
 ESC command do not need to be aware of following HPGL syntax as they are proceesed imeadiately and do not get placed in the planner buffer
 This means you can write an ESC command in the middle of a normal HPGL command and it would not break the syntax
-eg PU10ESC.L0,200;
+eg PU10 ESC.L 0,200;
 
 ESC.B - currently avalible free space in the plotter buffer ( bytes)- eg 1024/n
 ESC.E - output a decimal code if an RS232 error has occured
@@ -58,7 +58,7 @@ O.. commands
 These are processed in the planner buffer and will be handled when the plotter reads that section of data
 Writing these should be done while following the proper HPGL syntax
 
-eg - **NO GOOD** PU1OE;0,100
+eg - **NO GOOD** PU10 OE; 0,100;
      **GOOD**   PU100,100;OE;
 
 OA; - Output actual position X,Y,PEN UP/DOWN eg 100,100,1/n ( pen down = 1 up =0)
