@@ -77,6 +77,16 @@ bool GcodeHost::push(const uint8_t * sbuf, size_t len)
         //########################
         //HPGL does not use lines - send char as soon as it is ready
         #ifdef PLOTTER_FLOW_CONTROL
+        
+        // ##########################
+        // HPGL - check for [ESP] commands and remove
+        if (sbuf[i]=='[' && sbuf[i+1]=='E' && sbuf[i+2]=='S' && sbuf[i+3]=='P') {
+            // we have [ESP... now read until \n
+            while (sbuf[i]!='\n') {
+                // do nothing 
+                i++;
+            }
+        }
         flush();
     }
         #else
@@ -242,6 +252,9 @@ void GcodeHost::endStream()
     _step = HOST_NO_STREAM;
 }
 
+
+// HPGL for finding teminating char
+
 bool GcodeHost::detectControlChar(char c)
 {
 
@@ -352,15 +365,30 @@ void GcodeHost::readNextCommand()
             } else {
                 _processedSize++;
                 _currentPosition++;
-
                 //#############################
                 //HPGL Has no line structure - send all char as they arrive
-                // this is not working as I would expect - it is VERY slow and adding CR after each char
                 #ifdef PLOTTER_FLOW_CONTROL
-                if (! ((char)c =='\n') || ((char)c =='\r'))_currentCommand+=(char)c;
-                if (detectControlChar(c)){
-                    processing = false;
+
+                static int ESPcommand = 0;
+                if ((char)c =='[') {
+                    // we have [ESP]....
+                    ESPcommand = 1;
                 }
+                if (ESPcommand){
+                    if (((char)c =='\n') || ((char)c =='\r') || ((char)c ==']')) {
+                        ESPcommand =0;                    
+                    }
+                    else{
+                        // do nothing 
+                    } 
+                }
+                // ESP command filtered - continue as normal
+                else if(! ((char)c =='\n') || ((char)c =='\r'))_currentCommand+=(char)c;
+                    if (detectControlChar(c)){
+                        processing = false;
+                    }
+
+                // Normal Serial 
                 #else
                 if (!(((char)c =='\n') || ((char)c =='\r'))) {
                     _currentCommand+=(char)c;
@@ -393,6 +421,7 @@ bool GcodeHost::isCommand()
     }
     return true;
 }
+
 bool GcodeHost::isAckNeeded()
 {
     #ifdef PLOTTER_FLOW_CONTROL
@@ -457,6 +486,7 @@ void GcodeHost::handle()
     case HOST_START_STREAM:
         startStream();
         break;
+
     case HOST_READ_LINE:
         //#############################
         //HPGL Check on CTS/DTR pin
